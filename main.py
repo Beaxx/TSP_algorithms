@@ -87,7 +87,7 @@ elif algo == 2:
 elif algo == 3:
     mutation_rate = 0.07  # Max 0.2 (Aprox. code runtime till termination: 7 Minutes
     generation_size = 450
-    min_generations = 10000  # Minimum 500
+    min_generations = 1000  # Minimum 500
     # elitism = False;
 
     generation = 0

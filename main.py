@@ -85,9 +85,9 @@ elif algo == 2:
 
 # GA
 elif algo == 3:
-    mutation_rate = 0.07  # Max 0.2 (Aprox. code runtime till termination: 7 Minutes
+    mutation_rate = 0.07  # Max 0.2 (Aprox runtime with 0.07 till termination:
     generation_size = 450
-    min_generations = 1000  # Minimum 500
+    min_generations = 600  # Minimum 200
     # elitism = False;
 
     generation = 0
@@ -154,11 +154,13 @@ elif algo == 3:
 
         """Status and Termination"""
         """Print Status every 100 generations, Check if minimum Generations reached,
-        Check if current best fitness is better then average of last 500"""
+        Check if current best fitness is at least 0.05% better then average of last 400"""
         if generation % 100 == 0:
             print("Generation: " + str(generation) + " | Population Fittness: " + str(
                 pop_fit) + " | Best Individual: " + str(best_dist))
-            if len(track_best) > min_generations and best_dist < int(math.ceil(sum(track_best[-200:])/200)):
+            if len(track_best) > min_generations and best_dist * 1.0005 > sum(track_best[-400:])/400:
+                print("Final Generation: " + str(generation) + " | Population Fittness: " + str(
+                    pop_fit) + " | Best Individual: " + str(best_dist))
                 break
 
     """Show final"""
@@ -176,6 +178,9 @@ elif algo == 3:
     plt.suptitle("Fittness of best individuum")
     plt.ylabel('Fitness as Total Route Distance (lower == better)')
     plt.xlabel('Generation')
+    plt.plot(track_pop, label="Population average fitness")
+    plt.plot(track_best, label="Individual best fitness")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     plt.show()
 
 else:

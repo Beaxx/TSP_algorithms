@@ -29,7 +29,7 @@ def random_route(coordinates):
     recurse_route(coordinates)
     return route
 
-"""Fittness"""
+"""Fitness"""
 def distance(node1, node2):
     return math.sqrt((node1[0]-node2[0])**2 + (node1[1]-node2[1])**2)
 
@@ -85,7 +85,7 @@ def swap(route, a, b):
     return route
 
 
-def average_fittness(pop):
+def average_fitness(pop):
     s = 0.0
     for i in pop:
         s += distance_full(i)

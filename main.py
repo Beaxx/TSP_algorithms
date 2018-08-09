@@ -50,8 +50,8 @@ if algo == 1:
 elif algo == 2:
     print("Führe aus: 2opt Swap")
     random_route = random_route(scatter_coordiantes[:])  # Random Route
-    fittness = distance_full(random_route)
-    print("Start fitness " + str(fittness))
+    fitness = distance_full(random_route)
+    print("Start fitness " + str(fitness))
 
     best_route = random_route
     distance_best = distance_full(best_route)
@@ -85,10 +85,10 @@ elif algo == 2:
 
 # GA
 elif algo == 3:
-    mutation_rate = 0.07  # Max 0.2 (Aprox runtime with 0.07 till termination:
-    generation_size = 450
-    min_generations = 600  # Minimum 200
-    # elitism = False;
+    mutation_rate = 0.07  # Default: 0.07
+    generation_size = 500  # Default: 500   | about 10 * (n_dimensions off Problem)
+    min_generations = 1000  # Default: 1000 | Minimum >= lock_in_period
+    lock_in_period = 500  # Default: 1000
 
     generation = 0
     pop = []
@@ -103,7 +103,7 @@ elif algo == 3:
         generation += 1
 
         """Selection"""
-        pop_fit = round(average_fittness(pop), 2)
+        pop_fit = round(average_fitness(pop), 2)
         c_pop = pop[:]  # Cut all Individuals under Population average
         for i in c_pop:
             if distance_full(i) > pop_fit and len(pop) > 4:
@@ -121,7 +121,7 @@ elif algo == 3:
             offspring = genetic_algo_crossover(random.choice(e_pop), random.choice(e_pop))
             if offspring not in pop and offspring not in e_pop:  # Append Offspring to population if route doesnt allready exist
                 pop.append(offspring)
-        pop_fit = int(average_fittness(pop))
+        pop_fit = int(average_fitness(pop))
 
         """Mutation"""
         m_pop = [x for x in pop if x not in e_pop]  # Only Mutate offspring
@@ -156,11 +156,9 @@ elif algo == 3:
         """Print Status every 100 generations, Check if minimum Generations reached,
         Check if current best fitness is at least 0.05% better then average of last 400"""
         if generation % 100 == 0:
-            print("Generation: " + str(generation) + " | Population Fittness: " + str(
+            print("Generation: " + str(generation) + " | Population Fitness: " + str(
                 pop_fit) + " | Best Individual: " + str(best_dist))
-            if len(track_best) > min_generations and best_dist * 1.0005 > sum(track_best[-400:])/400:
-                print("Final Generation: " + str(generation) + " | Population Fittness: " + str(
-                    pop_fit) + " | Best Individual: " + str(best_dist))
+            if len(track_best) > min_generations and best_dist * 1.0005 > sum(track_best[-lock_in_period:])/lock_in_period:
                 break
 
     """Show final"""
@@ -173,14 +171,14 @@ elif algo == 3:
     show(block=False)
     plt.pause(0.01)
 
-    """Show fitness graph"""
+    """Show fitness  graph"""
     plt.figure(1)
-    plt.suptitle("Fittness of best individuum")
-    plt.ylabel('Fitness as Total Route Distance (lower == better)')
+    plt.suptitle("Fitness of best individuum")
+    plt.ylabel('Fitness  as Total Route Distance (lower == better)')
     plt.xlabel('Generation')
-    plt.plot(track_pop, label="Population average fitness")
-    plt.plot(track_best, label="Individual best fitness")
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.plot(track_pop, label="Population average fitness ")
+    plt.plot(track_best, label="Individual best fitness ")
+    plt.legend(loc="upper right")
     plt.show()
 
 else:

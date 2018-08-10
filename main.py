@@ -7,13 +7,13 @@ import ctypes
 import itertools
 from Logic import *
 import copy
+import time
 
 """Initialize Map"""
 img = mpimg.imread('Ressources/germany_without_cities.png')  # Map
 
 fig = plt.figure(0, figsize=(6, 8))
 plt.suptitle("Best Route")
-plt.axis("off")
 img_ax = fig.add_subplot(111)
 img_ax.imshow(img)
 
@@ -28,8 +28,8 @@ plt.pause(0.01)
 #                                     "angezeigt Menü gestartet werden können.", "Program Ablauf", 0)
 print("Bitte wählen Sie eine Optimierungsalgorithmus:\n"
       "[1]: Greedy - Wählt stets die kürzeste Verbindung zu nächstem Punkt\n"
-      "[2]: 2opt Swap\n"
-      "[3]: GA")
+      "[2]: 2opt Swap - Tauscht stets zwei Verbindungen zwischen Städten bis ein lokales Minimum erreicht ist\n"
+      "[3]: GA - Iterativer Algorithmus, der in Generationen arbeitet")
 
 """Algorithm Choice"""
 algo = int(input())
@@ -43,13 +43,13 @@ if algo == 1:
     dist = 0.0
     for i, node in enumerate(greedy_route[:-1]):
         dist += distance(node, greedy_route[i + 1])
-    print("Distanz: " + str(round(dist, 2)))
+    print("Distanz: " + str(round(dist, 4)))
     show()
 
 # 2-opt-Swap
 elif algo == 2:
     print("Führe aus: 2opt Swap")
-    random_route = random_route(scatter_coordiantes[:])  # Random Route
+    random_route = random_route(scatter_coordiantes[:])  # Random Rout
     fitness = distance_full(random_route)
     print("Start fitness " + str(fitness))
 
@@ -70,7 +70,6 @@ elif algo == 2:
                     improve = True
 
                     img_ax.clear()
-                    plt.axis("off")
                     img_ax.imshow(img)
                     Gu.draw_node_based(img_ax, best_route)
                     show(block=False)
@@ -78,17 +77,16 @@ elif algo == 2:
     print("End fitness " + str(distance_best))
     img_ax.clear()
     plt.imshow(img)
-    plt.axis("off")
     Gu.scatter_plot_map(scatter_coordiantes, fig.add_subplot(111))
     Gu.draw_node_based(img_ax, best_route)
     show()
 
 # GA
 elif algo == 3:
-    mutation_rate = 0.07  # Default: 0.07
-    generation_size = 500  # Default: 500   | about 10 * (n_dimensions off Problem)
-    min_generations = 1000  # Default: 1000 | Minimum >= lock_in_period
-    lock_in_period = 500  # Default: 1000
+    mutation_rate = 0.1  # Default: 0.1
+    generation_size = 1000  # Default: 1000   | about 10 * (n_dimensions off Problem)
+    min_generations = 800  # Default: 800 | Minimum >= lock_in_period
+    lock_in_period = 500  # Default: 500
 
     generation = 0
     pop = []
@@ -99,22 +97,27 @@ elif algo == 3:
     while True:
         """Initialize Population"""
         if generation == 0:
+            """Standard GA"""
             pop.extend(genetic_algo_random_population(scatter_coordiantes, generation_size))
+
+            """GA starting with Inital Greedy"""
+            # for i in range(0, generation_size-1):
+            #     pop.append(greedy_algo(scatter_coordiantes[:], True))
         generation += 1
 
         """Selection"""
-        pop_fit = round(average_fitness(pop), 2)
+        pop_fit = round(average_fitness(pop), 4)
         c_pop = pop[:]  # Cut all Individuals under Population average
         for i in c_pop:
             if distance_full(i) > pop_fit and len(pop) > 4:
                 pop.remove(i)
 
         """Select Best Individual"""
-        best_dist = int(distance_full(pop[0]))
+        best_dist = distance_full(pop[0])
         for k in pop:
             if distance_full(k) < best_dist:
                 best = k
-                best_dist = int(distance_full(k))
+                best_dist = distance_full(k)
 
         track_best.append(best_dist)
         track_pop.append(pop_fit)
@@ -131,7 +134,7 @@ elif algo == 3:
             offspring = genetic_algo_crossover(random.choice(e_pop), random.choice(e_pop))
             if offspring not in pop and offspring not in e_pop:  # Append Offspring to population if route doesnt allready exist
                 pop.append(offspring)
-        pop_fit = int(average_fitness(pop))
+        pop_fit = average_fitness(pop)
 
         """Mutation"""
         m_pop = [x for x in pop if x not in e_pop]  # Only Mutate offspring
@@ -146,26 +149,26 @@ elif algo == 3:
 
         # """Show generations best - very slow"""
         # img_ax.clear()
-        # plt.axis("off")
         # img_ax.imshow(img)
         # Gu.draw_node_based(img_ax, best)
         # show(block=False)
         # plt.pause(0.01)
 
         """Status and Termination"""
-        """Print Status every 100 generations, Check if minimum Generations reached,
-        Check if current best fitness is at least 0.05% better then average of last 400"""
-        if generation % 100 == 0:
-            print("Generation: " + str(generation) + " | Population Fitness: " + str(
-                pop_fit) + " | Best Individual: " + str(best_dist))
-            if len(track_best) > min_generations and best_dist * 1.0005 > sum(track_best[-lock_in_period:])/lock_in_period:
+        """Print Status every 50 generations, Check if minimum Generations reached,
+        Check if current populations fitness is at least 0.1% better then average of lock_in_period"""
+        if generation % 50 == 0:
+            print("Generation: " + str(generation) + " | Population Fitness: " + str(round(pop_fit, 2))
+                  + " | Best Individual: " + str(round(best_dist, 2)))
+
+            if len(track_best) > min_generations and best_dist * 1.001 > sum(
+                    track_best[-lock_in_period:]) / lock_in_period:
                 break
 
     """Show final"""
     best = pop[0]
     img_ax.clear()
     plt.imshow(img)
-    plt.axis("off")
     Gu.scatter_plot_map(scatter_coordiantes, fig.add_subplot(111))
     Gu.draw_node_based(img_ax, best)
     show(block=False)
@@ -173,7 +176,7 @@ elif algo == 3:
 
     """Show fitness  graph"""
     plt.figure(1)
-    plt.suptitle("Fitness of best individuum")
+    plt.suptitle("Fitness (Distance)")
     plt.ylabel('Fitness  as Total Route Distance (lower == better)')
     plt.xlabel('Generation')
     plt.plot(track_pop, label="Population average fitness ")

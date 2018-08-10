@@ -109,6 +109,16 @@ elif algo == 3:
             if distance_full(i) > pop_fit and len(pop) > 4:
                 pop.remove(i)
 
+        """Select Best Individual"""
+        best_dist = int(distance_full(pop[0]))
+        for k in pop:
+            if distance_full(k) < best_dist:
+                best = k
+                best_dist = int(distance_full(k))
+
+        track_best.append(best_dist)
+        track_pop.append(pop_fit)
+
         """Crossover"""
         e_pop = pop[:]  # Elite Population Group
         while len(pop) < generation_size:
@@ -130,19 +140,9 @@ elif algo == 3:
                 i1 = random.randrange(0, len(route) - 1)
                 i2 = random.randrange(0, len(route) - 1)
 
-                while i1 == i2:  # No swap with self
+                while i1 == i2:  # No swap with self or direct neighbour
                     i2 = random.randrange(0, len(route) - 1)
                 pop[i] = swap(route, i1, i2)
-
-        """Select Best Individual"""
-        best_dist = int(distance_full(pop[0]))
-        for k in pop:
-            if distance_full(k) < best_dist:
-                best = k
-                best_dist = int(distance_full(k))
-
-        track_best.append(best_dist)
-        track_pop.append(pop_fit)
 
         # """Show generations best - very slow"""
         # img_ax.clear()

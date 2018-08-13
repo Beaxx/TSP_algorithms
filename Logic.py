@@ -2,7 +2,10 @@ import math, random
 
 """Program"""
 def load_coordinates_from_file():
-    # Load Coordinates from File
+    """
+        Läd Koordinaten aus der coords.csv
+    :return: Gibt die Koordinaten als Liste zurück
+    """
     coord_file = "Ressources/coords.csv"
     file = open(coord_file, "r")
 
@@ -17,6 +20,11 @@ def load_coordinates_from_file():
 
 
 def random_route(coordinates):
+    """
+        Erstellt eine zufällige Route durch alle übergebenen Koordinaten
+    :param coordinates:
+    :return: Eine zufällige Route durch alle übergebenen Koordinaten
+    """
     route = []
 
     def recurse_route(n):
@@ -31,10 +39,21 @@ def random_route(coordinates):
 
 """Fitness"""
 def distance(node1, node2):
+    """
+        Berechnet die Distanz zwischen zwei Punkten
+    :param node1: Punkt 1
+    :param node2: Punkt 2
+    :return: Distanz
+    """
     return math.sqrt((node1[0]-node2[0])**2 + (node1[1]-node2[1])**2)
 
 
 def distance_full(route: list):
+    """
+        Berechnet die Summe aller Teildistanzen einer Route
+    :param route: Eine Liste an Punkten (In der Reihenfolge der Route)
+    :return: Die Gesamtdistanz der Route
+    """
     dist = 0.0
     for ind, node in enumerate(route[:-1]):
         dist += distance(node, route[ind+1])
@@ -43,6 +62,12 @@ def distance_full(route: list):
 
 """Greedy"""
 def greedy_algo(coordinates: list, is_first: bool):
+    """
+        Greedy Algorithmus
+    :param coordinates: Koordinaten, für die eine Route gefunden werden soll
+    :param is_first: Parameter
+    :return: Eine Liste von Koordinaten nach Bearbeitung durch den Greedy Algorithmus
+    """
     aux = coordinates
     result = []
 
@@ -72,6 +97,13 @@ def greedy_algo(coordinates: list, is_first: bool):
 
 """Two Opt Swap"""
 def two_opt_swap(route, i, j):
+    """
+        Tausch von zwei Verbindungen innerhalb einer Route
+    :param route: Route auf der operiert wird
+    :param i: Startindex
+    :param j: Endindex
+    :return: Route mit getauschen Punkten
+    """
     new = route[:]
     new[i:j] = route[j-1:i-1:-1]
     return new
@@ -79,6 +111,13 @@ def two_opt_swap(route, i, j):
 
 """Genetic Algo"""
 def swap(route, a, b):
+    """
+        Tausch zweiter Koordinaten in einer Route
+    :param route: Route auf der die Operation ausgeführt wird
+    :param a: Koordinate 1
+    :param b: Koordinate 2
+    :return:
+    """
     temp = route[a]
     route[a] = route[b]
     route[b] = temp
@@ -86,6 +125,11 @@ def swap(route, a, b):
 
 
 def average_fitness(pop):
+    """
+        Bildet die durchschnittliche Fitness einer Population
+    :param pop: Population aus Routen
+    :return: Durchschnittsfitness einer Population
+    """
     s = 0.0
     for i in pop:
         s += distance_full(i)
@@ -93,6 +137,12 @@ def average_fitness(pop):
 
 
 def genetic_algo_crossover(parrent1: list, parrent2: list):
+    """
+        Crossover Schema des genetischen Algorithmus
+    :param parrent1: Erster Elternteil
+    :param parrent2: Zweiter Elternteil
+    :return: Offspring Generation Route
+    """
     rand_ind1 = random.randrange(0, len(parrent1)-2)
 
     while True:
@@ -117,6 +167,12 @@ def genetic_algo_crossover(parrent1: list, parrent2: list):
 
 
 def genetic_algo_random_population(scatter_coordiantes, pop_size):
+    """
+        Erstellt eine zufällige Population aus Routen für den genetischen Algorithmus
+    :param scatter_coordiantes: Koordinaten, die Teil der Route sind
+    :param pop_size: Größe der Population / Anzahl der Routen
+    :return: Eine Population aus Routen
+    """
     pop = []
     for i in range(pop_size):
         pop.append(random_route(scatter_coordiantes[:]))

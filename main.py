@@ -1,13 +1,9 @@
 import GraphicsUnit as Gu
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import  plot, draw, show, ion
-import math, random
 import matplotlib.image as mpimg
 import ctypes
-import itertools
-from Logic import *
 import copy
-import time
+from Logic import *
 
 """Initialize Map"""
 img = mpimg.imread('Ressources/germany_without_cities.png')  # Map
@@ -17,19 +13,22 @@ plt.suptitle("Best Route")
 img_ax = fig.add_subplot(111)
 img_ax.imshow(img)
 
-scatter_coordiantes = load_coordinates_from_file()  # Scatter
+scatter_coordiantes = load_coordinates_from_file()  # Scatter Plot
 Gu.scatter_plot_map(scatter_coordiantes, img_ax)
-show(block=False)
+plt.show(block=False)
 plt.pause(0.01)
 
 """User Interaction"""
-# ctypes.windll.user32.MessageBoxW(0, "Die Software versucht die kürzeste\nVerbinddung zwischen 44 Punkten zu finden.\n\n"
-#                                     "Hierzu stehen verschiedene Algorithmen\nbereit, die über das in der Konsole\n"
-#                                     "angezeigt Menü gestartet werden können.", "Program Ablauf", 0)
+ctypes.windll.user32.MessageBoxW(0, "Die Software versucht die kürzeste\nVerbinddung zwischen 44 Punkten zu finden.\n\n"
+                                    "Hierzu stehen verschiedene Algorithmen\nbereit, die über das in der Konsole\n"
+                                    "angezeigt Menü gestartet werden können.", "Program Ablauf", 0)
 print("Bitte wählen Sie eine Optimierungsalgorithmus:\n"
-      "[1]: Greedy - Wählt stets die kürzeste Verbindung zu nächstem Punkt\n"
-      "[2]: 2opt Swap - Tauscht stets zwei Verbindungen zwischen Städten bis ein lokales Minimum erreicht ist\n"
-      "[3]: GA - Iterativer Algorithmus, der in Generationen arbeitet")
+      "[1]:\n "
+      "Greedy - Wählt stets die kürzeste Verbindung zum nächsten Punkt. Der Startpunkt wird zufällig gewählt.\n"
+      "[2]:\n 2-opt-swap - Ausgehend von einer zufälligen Route tauscht der Algorithmus so lang Routenpaare, "
+      "bis keine Verbesserung mehr möglich zu sein scheint.\n"
+      "[3]:\n Genetischer Algorithmus - Iterativer Algorithmus, der in Generationen arbeitet mit dem Ablauf\n"
+      "Selection > Crossover > Mutation  > ... arbeitet")
 
 """Algorithm Choice"""
 algo = int(input())
@@ -44,11 +43,11 @@ if algo == 1:
     for i, node in enumerate(greedy_route[:-1]):
         dist += distance(node, greedy_route[i + 1])
     print("Distanz: " + str(round(dist, 4)))
-    show()
+    plt.show()
 
 # 2-opt-Swap
 elif algo == 2:
-    print("Führe aus: 2opt Swap")
+    print("Führe aus: 2-opt-swap")
     random_route = random_route(scatter_coordiantes[:])  # Random Rout
     fitness = distance_full(random_route)
     print("Start fitness " + str(fitness))
@@ -72,14 +71,14 @@ elif algo == 2:
                     img_ax.clear()
                     img_ax.imshow(img)
                     Gu.draw_node_based(img_ax, best_route)
-                    show(block=False)
+                    plt.show(block=False)
                     plt.pause(0.01)
     print("End fitness " + str(distance_best))
     img_ax.clear()
     plt.imshow(img)
     Gu.scatter_plot_map(scatter_coordiantes, fig.add_subplot(111))
     Gu.draw_node_based(img_ax, best_route)
-    show()
+    plt.show()
 
 # GA
 elif algo == 3:
@@ -100,7 +99,7 @@ elif algo == 3:
             """Standard GA"""
             pop.extend(genetic_algo_random_population(scatter_coordiantes, generation_size))
 
-            """GA starting with Inital Greedy"""
+            """GA starting with initialization from Greedy"""
             # for i in range(0, generation_size-1):
             #     pop.append(greedy_algo(scatter_coordiantes[:], True))
         generation += 1
@@ -147,17 +146,17 @@ elif algo == 3:
                     i2 = random.randrange(0, len(route) - 1)
                 pop[i] = swap(route, i1, i2)
 
-        # """Show generations best - very slow"""
-        # img_ax.clear()
-        # img_ax.imshow(img)
-        # Gu.draw_node_based(img_ax, best)
-        # show(block=False)
-        # plt.pause(0.01)
-
         """Status and Termination"""
         """Print Status every 50 generations, Check if minimum Generations reached,
         Check if current populations fitness is at least 0.1% better then average of lock_in_period"""
         if generation % 50 == 0:
+            # """Show generations best - very slow"""
+            # img_ax.clear()
+            # img_ax.imshow(img)
+            # Gu.draw_node_based(img_ax, best)
+            # show(block=False)
+            # plt.pause(0.01)
+
             print("Generation: " + str(generation) + " | Population Fitness: " + str(round(pop_fit, 2))
                   + " | Best Individual: " + str(round(best_dist, 2)))
 
@@ -171,7 +170,7 @@ elif algo == 3:
     plt.imshow(img)
     Gu.scatter_plot_map(scatter_coordiantes, fig.add_subplot(111))
     Gu.draw_node_based(img_ax, best)
-    show(block=False)
+    plt.show(block=False)
     plt.pause(0.01)
 
     """Show fitness  graph"""
